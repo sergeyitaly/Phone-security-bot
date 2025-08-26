@@ -1,0 +1,135 @@
+
+# Termux Advanced Security Monitor with Telegram Alerts
+
+This project provides an automated security monitoring system for Android devices using Termux. It detects suspicious processes, Python scripts, reverse shells, network connections, world-writable files, and SUID/SGID binaries. Alerts are sent to a Telegram bot in real time.
+
+---
+
+## Features
+
+- Detect processes running outside system directories  
+- Detect Python scripts running in home or custom directories  
+- Detect reverse shells (`nc`, `bash -i`, `sh -i`, `python -c`, `perl -e`)  
+- Monitor external network connections and repeated attempts  
+- Monitor world-writable files and SUID/SGID binaries  
+- Monitor CPU/Memory usage  
+- Send real-time alerts via Telegram  
+
+---
+
+## Step-by-Step Setup
+
+### 1 Install Termux
+
+1. Install Termux from [F-Droid](https://f-droid.org/packages/com.termux/) or Play Store  
+2. Open Termux and update packages:
+
+```bash
+pkg update && pkg upgrade -y
+```
+
+3. Install required packages:
+
+```bash
+pkg install bash curl coreutils procps -y
+```
+
+---
+
+### 2 Install Termux:Boot
+
+1. Install Termux:Boot from [F-Droid](https://f-droid.org/packages/com.termux.boot/) or Play Store  
+2. Termux:Boot allows scripts to run automatically after device reboot.
+
+---
+
+### 3.Create a Telegram Bot
+
+1. Open **Telegram** and search **BotFather**  
+2. Send `/newbot` and follow instructions  
+3. Copy the **Bot Token**
+4. Get your **chat ID**:
+
+   - Send a message to your bot  
+   - Run in Termux:
+
+```bash
+curl -s "https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates"
+```
+
+- Replace `<YOUR_BOT_TOKEN>` with your token  
+- Copy `chat.id` from the JSON (Example: `123456789`)  
+
+---
+
+### 4 Create the Security Monitor Script
+
+1. Open editor:
+
+```bash
+nano ~/security_monitor.sh
+```
+
+2. Paste the full script (see detailed script in the project).  
+
+---
+
+### 5 Make the script executable
+
+```bash
+chmod +x ~/security_monitor.sh
+```
+
+---
+
+### 6 Setup auto-start at boot
+
+1. Copy to Termux boot directory:
+
+```bash
+mkdir -p ~/.termux/boot
+cp ~/security_monitor.sh ~/.termux/boot/
+chmod +x ~/.termux/boot/security_monitor.sh
+```
+
+2. Termux:Boot will run this script automatically after device reboot.
+
+---
+
+### 7 Test the monitor
+
+```bash
+nohup ~/security_monitor.sh > ~/security_monitor.log 2>&1 &
+tail -f ~/security_monitor.log
+```
+
+- Run a test Python script:
+
+```bash
+echo 'print("Test script")' > ~/test_suspicious.py
+python ~/test_suspicious.py &
+```
+
+- Telegram alerts should trigger for suspicious Python scripts.
+
+---
+
+### 8 Verify on reboot
+
+- Reboot your device  
+- Open Termux and check:
+
+```bash
+tail -f ~/security_monitor.log
+```
+
+- Ensure the script is running and detecting suspicious activity automatically.
+
+---
+
+### Notes
+
+- Only use on personal devices  
+- Adjust `sleep` interval for monitoring frequency  
+- Ensure Termux has network permissions for Telegram  
+- Monitor log file: `~/security_monitor.log`
