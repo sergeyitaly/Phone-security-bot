@@ -2,6 +2,8 @@
 # =====================================================
 # TERMUX ADVANCED SECURITY MONITOR WITH TELEGRAM ALERTS
 # =====================================================
+termux-wake-lock
+trap "termux-wake-unlock" EXIT
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
