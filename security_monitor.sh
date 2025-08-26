@@ -40,12 +40,12 @@ detect_suspicious() {
         fi
 
         # Allow SSH sessions but notify
-        if echo "$cmd" | grep -Eq "sshd|sshd-session"; then
+        if echo "$cmd" | grep -Eq "sshd|sshd-session|sshd:.*\[priv\]"; then
             msg="⚠️ SSH session detected PID $pid -> $cmd"
             echo -e "${GREEN}$msg${NC}"
             echo "$(date): $msg" >> "$LOGFILE"
             send_telegram "$msg"
-            continue  # Do not kill SSH processes
+            continue  # do not kill SSH processes
         fi
 
         # Suspicious executable paths
