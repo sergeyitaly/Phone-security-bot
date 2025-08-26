@@ -33,16 +33,31 @@ echo "=== Security Monitor Started at $(date) ===" >> "$LOGFILE"
 detect_suspicious() {
     ps -eo pid,ppid,cmd --no-headers | while read pid ppid cmd; do
         exe_path=$(readlink -f /proc/$pid/exe 2>/dev/null)
+
+        # Skip monitor itself
         if [ "$pid" -eq "$MY_PID" ] || [ "$exe_path" == "$MY_EXE" ]; then
             continue
         fi
+
+        # Allow SSH sessions but notify
+        if echo "$cmd" | grep -Eq "sshd|sshd-session"; then
+            msg="⚠️ SSH session detected PID $pid -> $cmd"
+            echo -e "${GREEN}$msg${NC}"
+            echo "$(date): $msg" >> "$LOGFILE"
+            send_telegram "$msg"
+            continue  # Do not kill SSH processes
+        fi
+
+        # Suspicious executable paths
         if [ -n "$exe_path" ] && [[ ! $exe_path =~ $SAFE_DIRS ]]; then
-            msg="⚠️ Suspicious PID $pid -> $exe_path"
+            msg="🚨 Suspicious PID $pid -> $exe_path"
             echo -e "${RED}$msg${NC}"
             echo "$(date): $msg" >> "$LOGFILE"
             kill -9 $pid && echo "$(date): Killed PID $pid" >> "$LOGFILE"
             send_telegram "$msg"
         fi
+
+        # Reverse shell detection
         if echo "$cmd" | grep -Eq "nc|bash -i|sh -i|python -c|perl -e"; then
             msg="🚨 Potential reverse shell PID $pid -> $cmd"
             echo -e "${RED}$msg${NC}"
