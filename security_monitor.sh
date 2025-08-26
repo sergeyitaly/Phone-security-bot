@@ -13,8 +13,8 @@ MY_PID=$$
 MY_EXE=$(readlink -f /proc/$$/exe)
 
 # ===== TELEGRAM SETTINGS =====
-BOT_TOKEN="8075433815:AAHFjiCIoS3RiFOkU2YPf75iMWKd3fvq53c"
-CHAT_ID="583805446"
+BOT_TOKEN="telegrambottoken"
+CHAT_ID="chatid"
 
 send_telegram() {
     local message="$1"
